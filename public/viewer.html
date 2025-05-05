@@ -1,17 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <title>3D Viewer</title>
+    <meta charset="utf-8" />
+    <title>Canvas 3D Viewer</title>
     <style>
       body {
         margin: 0;
+        overflow: hidden;
+        background: black;
+      }
+      canvas {
+        display: block;
+      }
+      #insertBtn {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 999;
+        padding: 10px 20px;
+        font-size: 16px;
+        background: #2d8cff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: none;
       }
     </style>
   </head>
   <body>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+    <button id="insertBtn" onclick="selectModel()">Insert into Canvas</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
     <script>
+      // Basic 3D scene setup
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(
         75,
@@ -24,11 +46,12 @@
       document.body.appendChild(renderer.domElement);
 
       const geometry = new THREE.BoxGeometry();
-      const material = new THREE.MeshNormalMaterial();
+      const material = new THREE.MeshBasicMaterial({ color: 0x8888ff });
       const cube = new THREE.Mesh(geometry, material);
       scene.add(cube);
 
       camera.position.z = 5;
+
       function animate() {
         requestAnimationFrame(animate);
         cube.rotation.x += 0.01;
@@ -36,6 +59,21 @@
         renderer.render(scene, camera);
       }
       animate();
+
+      // LTI embed logic
+      function selectModel() {
+        const iframeHtml = `<iframe src="https://3dviewertest-production.up.railway.app/viewer.html" width="800" height="600" allowfullscreen></iframe>`;
+        const message = {
+          subject: "lti.content_itemSelection",
+          content_items: iframeHtml,
+        };
+        window.parent.postMessage(JSON.stringify(message), "*");
+      }
+
+      // Only show the button if inside a modal (Canvas editor iframe)
+      if (window !== window.parent) {
+        document.getElementById("insertBtn").style.display = "block";
+      }
     </script>
   </body>
 </html>

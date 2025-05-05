@@ -33,7 +33,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
     <script>
-      // Basic 3D scene setup
+      // Three.js viewer setup
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(
         75,
@@ -49,7 +49,6 @@
       const material = new THREE.MeshBasicMaterial({ color: 0x8888ff });
       const cube = new THREE.Mesh(geometry, material);
       scene.add(cube);
-
       camera.position.z = 5;
 
       function animate() {
@@ -60,17 +59,45 @@
       }
       animate();
 
-      // LTI embed logic
+      // LTI Content Item Return implementation
       function selectModel() {
+        const returnUrl = new URLSearchParams(window.location.search).get(
+          "content_item_return_url"
+        );
+
+        if (!returnUrl) {
+          alert("This tool was not launched as a content item selection.");
+          return;
+        }
+
         const iframeHtml = `<iframe src="https://3dviewertest-production.up.railway.app/viewer.html" width="800" height="600" allowfullscreen></iframe>`;
-        const message = {
-          subject: "lti.content_itemSelection",
-          content_items: iframeHtml,
+
+        const contentItem = {
+          "@context": "http://purl.imsglobal.org/ctx/lti/v1/ContentItem",
+          "@graph": [
+            {
+              "@type": "ContentItem",
+              mediaType: "text/html",
+              text: iframeHtml,
+            },
+          ],
         };
-        window.parent.postMessage(JSON.stringify(message), "*");
+
+        const form = document.createElement("form");
+        form.action = returnUrl;
+        form.method = "POST";
+
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "content_items";
+        input.value = JSON.stringify(contentItem);
+        form.appendChild(input);
+
+        document.body.appendChild(form);
+        form.submit();
       }
 
-      // Only show the button if inside a modal (Canvas editor iframe)
+      // Show insert button if in Canvas editor modal
       if (window !== window.parent) {
         document.getElementById("insertBtn").style.display = "block";
       }

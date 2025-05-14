@@ -1,36 +1,40 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const helmet = require('helmet');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ Allow Canvas to embed this app in an iframe
-app.use((req, res, next) => {
-  res.setHeader("Content-Security-Policy", "frame-ancestors https://canvas.instructure.com");
-  next();
-});
+// ✅ Allow Canvas to embed this site in an iframe using helmet
+app.use(helmet({
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      'frame-ancestors': ["https://canvas.instructure.com"]
+    }
+  }
+}));
 
-// ✅ Middleware to parse incoming LTI POST data
+// ✅ Middleware to parse LTI launch POST data
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// ✅ Serve static assets (like viewer.html)
+// ✅ Serve static files (like viewer.html)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ✅ LTI Launch endpoint - POST (used by Canvas on editor_button click)
+// ✅ Handle LTI launch POST request from Canvas
 app.post('/launch', (req, res) => {
   const { oauth_consumer_key } = req.body;
 
-  // Basic LTI presence check
   if (!oauth_consumer_key) {
-    return res.status(400).send("Invalid LTI launch: missing oauth_consumer_key.");
+    return res.status(400).send("Missing oauth_consumer_key. Invalid LTI launch.");
   }
 
   res.sendFile(path.join(__dirname, 'public', 'viewer.html'));
 });
 
-// ✅ Optional GET /launch route (fallback for manual tests)
+// ✅ Optional fallback GET route (for testing)
 app.get('/launch', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'viewer.html'));
 });

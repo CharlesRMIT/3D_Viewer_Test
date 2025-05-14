@@ -1,14 +1,70 @@
-<script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Canvas 3D Viewer</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #000;
+    }
+    #insertBtn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #2d8cff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: none;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+</head>
+<body>
+  <button id="insertBtn" onclick="selectModel()">Insert into Canvas</button>
+
+  <script>
+    // Basic 3D cube setup using Three.js
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshBasicMaterial({ color: 0x00aaff });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+    camera.position.z = 5;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.01;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Deep linking insertion logic
     function selectModel() {
       const returnUrl = new URLSearchParams(window.location.search).get("content_item_return_url");
-  
+
       if (!returnUrl) {
-        alert("This tool was not launched via deep linking. Cannot embed.");
+        alert("This tool was not launched from Canvas via Deep Linking.");
         return;
       }
-  
+
       const iframeHtml = `<iframe src="https://3dviewertest-production.up.railway.app/viewer.html" width="800" height="600" allowfullscreen></iframe>`;
-  
+
       const contentItem = {
         "@context": "http://purl.imsglobal.org/ctx/lti/v1/ContentItem",
         "@graph": [
@@ -19,35 +75,37 @@
           }
         ]
       };
-  
+
       const form = document.createElement("form");
       form.method = "POST";
       form.action = returnUrl;
-  
-      const contentInput = document.createElement("input");
-      contentInput.type = "hidden";
-      contentInput.name = "content_items";
-      contentInput.value = JSON.stringify(contentItem);
-      form.appendChild(contentInput);
-  
-      const messageInput = document.createElement("input");
-      messageInput.type = "hidden";
-      messageInput.name = "lti_message_type";
-      messageInput.value = "ContentItemSelection";
-      form.appendChild(messageInput);
-  
-      const versionInput = document.createElement("input");
-      versionInput.type = "hidden";
-      versionInput.name = "lti_version";
-      versionInput.value = "LTI-1p0";
-      form.appendChild(versionInput);
-  
+
+      const input1 = document.createElement("input");
+      input1.type = "hidden";
+      input1.name = "content_items";
+      input1.value = JSON.stringify(contentItem);
+      form.appendChild(input1);
+
+      const input2 = document.createElement("input");
+      input2.type = "hidden";
+      input2.name = "lti_message_type";
+      input2.value = "ContentItemSelection";
+      form.appendChild(input2);
+
+      const input3 = document.createElement("input");
+      input3.type = "hidden";
+      input3.name = "lti_version";
+      input3.value = "LTI-1p0";
+      form.appendChild(input3);
+
       document.body.appendChild(form);
       form.submit();
     }
-  
+
+    // Only show the button if inside a Canvas iframe modal
     if (window !== window.parent) {
       document.getElementById("insertBtn").style.display = "block";
     }
   </script>
-  
+</body>
+</html>

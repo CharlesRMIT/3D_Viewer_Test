@@ -9,9 +9,6 @@
         overflow: hidden;
         background: black;
       }
-      canvas {
-        display: block;
-      }
       #insertBtn {
         position: absolute;
         top: 20px;
@@ -26,6 +23,9 @@
         cursor: pointer;
         display: none;
       }
+      canvas {
+        display: block;
+      }
     </style>
   </head>
   <body>
@@ -33,7 +33,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
     <script>
-      // Three.js viewer setup
+      // Setup 3D scene
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(
         75,
@@ -59,7 +59,7 @@
       }
       animate();
 
-      // LTI Content Item Return implementation
+      // Handle Insert to Canvas (Deep Linking)
       function selectModel() {
         const returnUrl = new URLSearchParams(window.location.search).get(
           "content_item_return_url"
@@ -97,7 +97,7 @@
         form.submit();
       }
 
-      // Show insert button if in Canvas editor modal
+      // Only show insert button when inside iframe/modal
       if (window !== window.parent) {
         document.getElementById("insertBtn").style.display = "block";
       }

@@ -33,14 +33,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
     <script>
-      // Setup the 3D viewer
+      // Setup 3D scene
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        1000
-      );
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       const renderer = new THREE.WebGLRenderer();
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
@@ -59,7 +54,7 @@
       }
       animate();
 
-      // Send iframe HTML to Canvas using LTI postMessage
+      // Send postMessage to Canvas
       function selectModel() {
         const iframeHtml = `<iframe src="https://3dviewertest-production.up.railway.app/viewer.html" width="800" height="600" allowfullscreen></iframe>`;
 
@@ -68,22 +63,21 @@
           "@graph": [
             {
               "@type": "ContentItem",
-              mediaType: "text/html",
-              text: iframeHtml,
-            },
-          ],
+              "mediaType": "text/html",
+              "text": iframeHtml
+            }
+          ]
         };
 
         const message = {
           subject: "lti.content_itemSelection",
-          content_items: JSON.stringify(contentItem),
+          content_items: JSON.stringify(contentItem)
         };
 
         console.log("✅ Sending to Canvas:", message);
         window.parent.postMessage(JSON.stringify(message), "*");
       }
 
-      // Show the insert button only if launched inside Canvas
       if (window !== window.parent) {
         document.getElementById("insertBtn").style.display = "block";
       }

@@ -59,19 +59,39 @@
       }
       animate();
 
-      // ✅ Embed iframe using Canvas' LTI postMessage method
       function selectModel() {
         const iframeHtml = `<iframe src="https://3dviewertest-production.up.railway.app/viewer.html" width="800" height="600" allowfullscreen></iframe>`;
 
-        const message = {
+        // Try Deep Linking postMessage (Canvas listens for this if context is right)
+        const deepLinkMsg = {
           subject: "lti.content_itemSelection",
           content_items: iframeHtml,
         };
+        window.parent.postMessage(JSON.stringify(deepLinkMsg), "*");
 
-        window.parent.postMessage(JSON.stringify(message), "*");
+        // Try direct editor injection fallback (may work in some Canvas editors)
+        try {
+          const parentDoc = window.parent.document;
+          const rce =
+            parentDoc.querySelector('textarea[name="page[body]"]') ||
+            parentDoc.querySelector('div[role="textbox"]');
+
+          if (rce) {
+            if (rce.tagName === "TEXTAREA") {
+              rce.value += "\n" + iframeHtml;
+            } else if (rce.contentEditable === "true") {
+              rce.innerHTML += iframeHtml;
+            }
+            alert("✅ 3D viewer iframe injected into the page!");
+          } else {
+            console.log("⚠️ Could not find RCE area to inject.");
+          }
+        } catch (err) {
+          console.error("Editor injection failed:", err);
+        }
       }
 
-      // ✅ Only show the insert button if inside an iframe (Canvas modal)
+      // Only show the button if inside iframe (Canvas modal)
       if (window !== window.parent) {
         document.getElementById("insertBtn").style.display = "block";
       }

@@ -33,7 +33,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
     <script>
-      // Setup 3D scene
+      // Setup 3D viewer
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(
         75,
@@ -59,45 +59,19 @@
       }
       animate();
 
-      // Handle Insert to Canvas (Deep Linking)
+      // ✅ Embed iframe using Canvas' LTI postMessage method
       function selectModel() {
-        const returnUrl = new URLSearchParams(window.location.search).get(
-          "content_item_return_url"
-        );
-
-        if (!returnUrl) {
-          alert("This tool was not launched as a content item selection.");
-          return;
-        }
-
         const iframeHtml = `<iframe src="https://3dviewertest-production.up.railway.app/viewer.html" width="800" height="600" allowfullscreen></iframe>`;
 
-        const contentItem = {
-          "@context": "http://purl.imsglobal.org/ctx/lti/v1/ContentItem",
-          "@graph": [
-            {
-              "@type": "ContentItem",
-              mediaType: "text/html",
-              text: iframeHtml,
-            },
-          ],
+        const message = {
+          subject: "lti.content_itemSelection",
+          content_items: iframeHtml,
         };
 
-        const form = document.createElement("form");
-        form.action = returnUrl;
-        form.method = "POST";
-
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "content_items";
-        input.value = JSON.stringify(contentItem);
-        form.appendChild(input);
-
-        document.body.appendChild(form);
-        form.submit();
+        window.parent.postMessage(JSON.stringify(message), "*");
       }
 
-      // Only show insert button when inside iframe/modal
+      // ✅ Only show the insert button if inside an iframe (Canvas modal)
       if (window !== window.parent) {
         document.getElementById("insertBtn").style.display = "block";
       }

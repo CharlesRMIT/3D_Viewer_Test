@@ -33,7 +33,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
     <script>
-      // Setup 3D scene
+      // Set up basic 3D scene
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(
         75,
@@ -59,28 +59,31 @@
       }
       animate();
 
-      // Embed the iframe into Canvas using postMessage (LTI content item return)
+      // Correct Content Item Return via postMessage
       function selectModel() {
         const iframeHtml = `<iframe src="https://3dviewertest-production.up.railway.app/viewer.html" width="800" height="600" allowfullscreen></iframe>`;
 
-        const message = {
-          subject: "lti.content_itemSelection",
-          content_items: {
-            "@context": "http://purl.imsglobal.org/ctx/lti/v1/ContentItem",
-            "@graph": [
-              {
-                "@type": "ContentItem",
-                mediaType: "text/html",
-                text: iframeHtml,
-              },
-            ],
-          },
+        const contentItem = {
+          "@context": "http://purl.imsglobal.org/ctx/lti/v1/ContentItem",
+          "@graph": [
+            {
+              "@type": "ContentItem",
+              mediaType: "text/html",
+              text: iframeHtml,
+            },
+          ],
         };
 
+        const message = {
+          subject: "lti.content_itemSelection",
+          content_items: JSON.stringify(contentItem), // Canvas expects this stringified
+        };
+
+        console.log("✅ Sending to Canvas:", message);
         window.parent.postMessage(JSON.stringify(message), "*");
       }
 
-      // Show insert button only if inside an iframe (Canvas modal)
+      // Only show button if tool is inside Canvas iframe modal
       if (window !== window.parent) {
         document.getElementById("insertBtn").style.display = "block";
       }

@@ -33,6 +33,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
     <script>
+      // Setup the 3D viewer
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(
         75,
@@ -58,6 +59,7 @@
       }
       animate();
 
+      // Send iframe HTML to Canvas using LTI postMessage
       function selectModel() {
         const iframeHtml = `<iframe src="https://3dviewertest-production.up.railway.app/viewer.html" width="800" height="600" allowfullscreen></iframe>`;
 
@@ -81,6 +83,7 @@
         window.parent.postMessage(JSON.stringify(message), "*");
       }
 
+      // Show the insert button only if launched inside Canvas
       if (window !== window.parent) {
         document.getElementById("insertBtn").style.display = "block";
       }

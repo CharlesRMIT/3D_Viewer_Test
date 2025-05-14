@@ -1,73 +1,53 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Canvas 3D Viewer</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: black;
-    }
-    #insertBtn {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      z-index: 999;
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #2d8cff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      display: none;
-    }
-    canvas {
-      display: block;
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-</head>
-<body>
-  <button id="insertBtn" onclick="selectModel()">Insert into Canvas</button>
-
-  <script>
-    // Set up 3D viewer scene
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshBasicMaterial({ color: 0x8888ff });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-    camera.position.z = 5;
-
-    function animate() {
-      requestAnimationFrame(animate);
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    // Embed iframe using lti.embed_html
+<script>
     function selectModel() {
+      const returnUrl = new URLSearchParams(window.location.search).get("content_item_return_url");
+  
+      if (!returnUrl) {
+        alert("This tool was not launched via deep linking. Cannot embed.");
+        return;
+      }
+  
       const iframeHtml = `<iframe src="https://3dviewertest-production.up.railway.app/viewer.html" width="800" height="600" allowfullscreen></iframe>`;
-      const message = {
-        subject: "lti.embed_html",
-        html: iframeHtml
+  
+      const contentItem = {
+        "@context": "http://purl.imsglobal.org/ctx/lti/v1/ContentItem",
+        "@graph": [
+          {
+            "@type": "ContentItem",
+            "mediaType": "text/html",
+            "text": iframeHtml
+          }
+        ]
       };
-      console.log("📤 Sending embed_html to Canvas", message);
-      window.parent.postMessage(message, "*");
+  
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = returnUrl;
+  
+      const contentInput = document.createElement("input");
+      contentInput.type = "hidden";
+      contentInput.name = "content_items";
+      contentInput.value = JSON.stringify(contentItem);
+      form.appendChild(contentInput);
+  
+      const messageInput = document.createElement("input");
+      messageInput.type = "hidden";
+      messageInput.name = "lti_message_type";
+      messageInput.value = "ContentItemSelection";
+      form.appendChild(messageInput);
+  
+      const versionInput = document.createElement("input");
+      versionInput.type = "hidden";
+      versionInput.name = "lti_version";
+      versionInput.value = "LTI-1p0";
+      form.appendChild(versionInput);
+  
+      document.body.appendChild(form);
+      form.submit();
     }
-
+  
     if (window !== window.parent) {
       document.getElementById("insertBtn").style.display = "block";
     }
   </script>
-</body>
-</html>
+  

@@ -4,21 +4,20 @@
     "description": "LTI 1.1 tool to embed a 3D model viewer into Canvas LMS pages",
     "main": "server.js",
     "scripts": {
-      "start": "node server.js"
+        "start": "node server.js"
     },
     "keywords": [
-      "canvas",
-      "lti",
-      "3d",
-      "viewer",
-      "express",
-      "three.js"
+        "canvas",
+        "lti",
+        "3d",
+        "viewer",
+        "express",
+        "three.js"
     ],
     "author": "Your Name",
     "license": "MIT",
     "dependencies": {
-      "body-parser": "^1.20.2",
-      "express": "^4.18.2"
+        "body-parser": "^1.20.2",
+        "express": "^4.18.2"
     }
-  }
-  
+}

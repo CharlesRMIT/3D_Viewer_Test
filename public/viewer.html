@@ -1,17 +1,51 @@
-<script>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Canvas 3D Viewer</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+    }
+    #insertBtn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 999;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #2d8cff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: none;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+</head>
+<body>
+  <button id="insertBtn" onclick="selectModel()">Insert into Canvas</button>
+
+  <script>
     // Set up 3D viewer scene
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
-  
+
     const geometry = new THREE.BoxGeometry();
     const material = new THREE.MeshBasicMaterial({ color: 0x8888ff });
     const cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
     camera.position.z = 5;
-  
+
     function animate() {
       requestAnimationFrame(animate);
       cube.rotation.x += 0.01;
@@ -19,22 +53,21 @@
       renderer.render(scene, camera);
     }
     animate();
-  
-    // Embed the viewer iframe using lti.embed_html
+
+    // Embed iframe using lti.embed_html
     function selectModel() {
       const iframeHtml = `<iframe src="https://3dviewertest-production.up.railway.app/viewer.html" width="800" height="600" allowfullscreen></iframe>`;
-  
       const message = {
         subject: "lti.embed_html",
         html: iframeHtml
       };
-  
       console.log("📤 Sending embed_html to Canvas", message);
       window.parent.postMessage(message, "*");
     }
-  
+
     if (window !== window.parent) {
       document.getElementById("insertBtn").style.display = "block";
     }
   </script>
-  
+</body>
+</html>
